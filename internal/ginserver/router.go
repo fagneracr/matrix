@@ -35,17 +35,22 @@ func setupRouter() *gin.Engine {
 			c.JSON(http.StatusOK, gin.H{"is_valid": false})
 			return
 		}
+		// Verify if input is valid,only contain letters authorized
 		isvalidInput := verifymatrix.ArrayisValid(letters.Letters)
 		if !isvalidInput {
 			c.JSON(http.StatusOK, gin.H{"is_valid": false})
 			return
 		}
+		//Verify sequence, if found 2 or more is valid
 		countfind := 0
 		countfind = countfind + verifymatrix.FindSequence(letters.Letters)
+		// Arrange to vertical
 		matrixv := verifymatrix.BuildVertical(letters.Letters)
 		countfind = countfind + verifymatrix.FindSequence(matrixv)
+		// Arrange to diagonal
 		diagnais := verifymatrix.FindDiagonais(letters.Letters)
 		countfind = countfind + verifymatrix.FindSequence(diagnais)
+		//Output if is valid or not
 		if countfind >= 2 {
 			db.Set(letters.Letters, true)
 			c.JSON(http.StatusOK, gin.H{"is_valid": true})
@@ -56,11 +61,8 @@ func setupRouter() *gin.Engine {
 		return
 	})
 	r.GET("/stats", func(c *gin.Context) {
+		// Get in database data ratio
 		valid, notvalid, ratio := db.ReturnStats()
-		//jsonresult, err := json.MarshalIndent(result, " ", " ")
-		// if err != nil {
-		// 	fmt.Println(err.Error())
-		// }
 		c.JSON(http.StatusOK, gin.H{
 			"count_valid":   valid,
 			"count_invalid": notvalid,
